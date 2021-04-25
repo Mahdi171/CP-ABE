@@ -6,8 +6,6 @@ This repository is created to share the code of a recently constant key and cons
 The code is written in python under [charm-crypto](https://github.com/iulianiosep/charm-crypto) library. 
 
 ## References
-<a id="1">[1]</a> 
- 
-Sedaghat, Mahdi, and Bart Preneel. (2021). 
+<a id="1">[1]</a> Sedaghat, Mahdi, and Bart Preneel, 
 "Cross-Domain Attribute-Based Access Control Encryption." 
-eprint/2021/73, [Available in](https://www.esat.kuleuven.be/cosic/publications/article-3308.pdf).
+eprint/2021/73, (2021). [Available in](https://www.esat.kuleuven.be/cosic/publications/article-3308.pdf).
