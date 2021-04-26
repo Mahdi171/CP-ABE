@@ -2,7 +2,7 @@ from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.toolbox.secretutil import SecretUtil
 from charm.toolbox.ABEnc import ABEnc, Input, Output
 from collections import defaultdict
-
+from Zeropoly import Zero_poly
 # type annotations'
 pk_t = { 'g_2':G1, 'h_i':G2, 'e_gg_alpha':GT}
 mk_t = {'alpha':ZR, 'g':G1 }
@@ -44,22 +44,13 @@ class CPabe_SP21(ABEnc):
     @Input(pk_t, GT, [str])
     @Output(ct_t)
     def encrypt(self, pk, M, P): 
-        a=[]; C2=1; idx = [1, 0]; mult = defaultdict(int)
+        a=[]; C2=1
         Com_set= list(set(U) - set(P))
         for attrs in Com_set:
             a.append(group.hash(attrs, ZR))
-        for i1, c1 in zip(idx, [1,a[0]]):
-            for i2, c2 in zip(idx, [1,a[1]]):
-                for i3, c3 in zip(idx, [1,a[2]]):
-                    for i4, c4 in zip(idx, [1,a[3]]):
-                        for i5, c5 in zip(idx, [1,a[4]]):
-                            for i6, c6 in zip(idx, [1,a[5]]):
-                                for i7, c7 in zip(idx, [1,a[6]]):
-                                    mult[i1 + i2 + i3 + i4 + i5 + i6 + i7] += c1 * c2 * c3 * c4 * c5 * c6 * c7 
-        mult_sorted = tuple(sorted(mult.items(), reverse=True))
-        #idx_mult = [item[0] for item in mult_sorted]
-        coeff_mult = [item[1] for item in mult_sorted]; Coeffs=list(reversed(coeff_mult))
-        for i in range(len(Coeffs)):
+        (indices,coeff_mult)=Zero_poly(a,len(a)-1,[0],[1])
+        Coeffs=list(reversed(coeff_mult))
+        for i in range(len(indices)):
             C2*= (pk['h_i'][i+1] ** Coeffs[i])
         r = group.random(ZR)     
         C = M * (pk['e_gg_alpha'] ** r)
@@ -71,19 +62,12 @@ class CPabe_SP21(ABEnc):
     @Output(GT)
     def decrypt(self, pk, sk, ct):
         A=list(set(sk['B'])-set(ct['policy']))
-        a=[]; z=1; idx = [1, 0]; mult = defaultdict(int)
+        a=[]; z=1
         for attrs in A:
             a.append(group.hash(attrs, ZR))
-        for i1, c1 in zip(idx, [1,a[0]]):
-            for i2, c2 in zip(idx, [1,a[1]]):
-                mult[i1+i2] += c1 * c2
-        mult_sorted = tuple(sorted(mult.items(), reverse=True))
-        #idx_mult = [item[0] for item in mult_sorted]
-        coeff_mult = [item[1] for item in mult_sorted]; Coeffs=list(reversed(coeff_mult))
-        for i in range(len(Coeffs)-1):
+        (indices,coeff_mult)=Zero_poly(a,len(a)-1,[0],[1])
+        Coeffs=list(reversed(coeff_mult))
+        for i in range(len(indices)-1):
             z*= pk['h_i'][i] ** Coeffs[i+1]
         V=(pair(ct['C1'],z) * pair(sk['dk'],ct['C2']))
         return ct['C'] * (V**(-1/Coeffs[0]))
-
-
-
